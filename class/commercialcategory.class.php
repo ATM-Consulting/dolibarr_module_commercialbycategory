@@ -52,10 +52,10 @@ class TCommercialCategory extends TObjetStd {
 		setEventMessage($langs->trans('CategUserAffectation', $nb_user, $nb_soc));
 	}
 
-	static function updateSociete(&$PDOdb, &$soc, $fk_category = null) {
+	static function updateSociete(&$PDOdb, &$soc, $fk_category = null, $not_in_category=null) {
 		global $langs,$conf,$user,$db;
 		
-		$TUserIdAffected = TCommercialCategory::getAllUserForSociete($PDOdb, $soc->id,$fk_category);
+		$TUserIdAffected = TCommercialCategory::getAllUserForSociete($PDOdb, $soc->id,$fk_category,$not_in_category);
 		
 		if(!empty($TUserIdAffected)) {
 			foreach($TUserIdAffected as $idcomm) {
@@ -107,15 +107,16 @@ class TCommercialCategory extends TObjetStd {
 		
 	}
 	
-	static function getAllUserForSociete(&$PDOdb, $fk_soc,$fk_category=null) {
+	static function getAllUserForSociete(&$PDOdb, $fk_soc,$fk_category=null, $not_in_category=null) {
 		//$PDOdb->debug=true;
 		
 		$sql ="SELECT DISTINCT fk_user 
 				FROM ".MAIN_DB_PREFIX."commercial_category cc
 				LEFT JOIN ".MAIN_DB_PREFIX."categorie_societe cs ON (cs.fk_categorie = cc.fk_category )
-				WHERE cs.fk_soc=".$fk_soc;
+				WHERE (cs.fk_soc=".$fk_soc.")";
 		
 		if($fk_category>0) $sql.=" OR cc.fk_category=".$fk_category;
+		if($not_in_category>0) $sql.=" AND cc.fk_category!=".$not_in_category;
 		
 		$Tab = $PDOdb->ExecuteAsArray($sql);
 				

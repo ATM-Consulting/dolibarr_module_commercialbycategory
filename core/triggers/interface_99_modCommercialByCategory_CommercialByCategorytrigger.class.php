@@ -125,13 +125,13 @@ class InterfaceCommercialByCategorytrigger
 			dol_include_once('/commercialbycategory/class/commercialcategory.class.php');
 			$PDOdb=new TPDOdb;
 			
-			if(!empty($object->linkto)) {
-				$soc = &$object->linkto;
-			}else {
-				$soc = &$object->unlinkoff;
+			if($action === 'CATEGORY_LINK') {
+				TCommercialCategory::updateSociete($PDOdb, $object->linkto,$object->id);
 			}
-			//$PDOdb->debug=true;
-			TCommercialCategory::updateSociete($PDOdb, $soc,$object->id);
+			else {
+				TCommercialCategory::updateSociete($PDOdb, $object->unlinkoff,null,$object->id);
+			}
+			
 			//exit('!');
             dol_syslog(
                 "Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". id=" . $object->id
