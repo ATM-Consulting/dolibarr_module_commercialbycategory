@@ -22,7 +22,7 @@ class TCommercialCategory extends TObjetStd {
 			$o->fk_user = $fk_user;
 			$o->save($PDOdb);
 			
-			$o->updateSoc($PDOdb);
+			$o->updateAllSoc($PDOdb);
 		}
 	}
 	static function del(&$PDOdb, $fk_category, $fk_user) {
@@ -30,37 +30,50 @@ class TCommercialCategory extends TObjetStd {
 		$o=new TCommercialCategory;
 		if($o->loadByCategoryUser($PDOdb, $fk_category, $fk_user)) {
 			$o->delete($PDOdb);		
-			$o->updateSoc($PDOdb);	
+			$o->updateAllSoc($PDOdb);	
 		}
 	}
 
-	function updateSoc(&$PDOdb) {
+	function updateAllSoc(&$PDOdb) {
 		
 		global $langs,$conf,$user,$db;
-		$TUser = TCommercialCategory::getUser($PDOdb, $this->fk_category);
-		$TSociete = TCommercialCategory::getSociete($PDOdb, $this->fk_category);
-		
+		$TUser = TCommercialCategory::getUser($PDOdb, $this->fk_category); // useless, just for popup
 		$nb_user = count($TUser);
+		
+		$TSociete = TCommercialCategory::getSociete($PDOdb, $this->fk_category);
 		$nb_soc = count($TSociete);
 		
 		foreach($TSociete as &$soc) {
-			if(!empty($soc->TUserIdAffected)) {
-				foreach($soc->TUserIdAffected as $idcomm) {
-					$soc->add_commercial($user, $idcomm);
-				}
-				
-			}
-
-			$listsalesrepresentatives=$soc->getSalesRepresentatives($user);			
-			foreach($listsalesrepresentatives as &$comm) {
-				if(!in_array($comm['id'], $soc->TUserIdAffected)) {
-					$soc->del_commercial($user, $comm['id']);
-				}
-			}
+			
+			self::pdateSociete($PDOdb,$soc);
 
 		}
 		
 		setEventMessage($langs->trans('CategUserAffectation', $nb_user, $nb_soc));
+	}
+
+	static function updateSociete(&$PDOdb, &$soc, $fk_category = null) {
+		global $langs,$conf,$user,$db;
+		
+		$TUserIdAffected = TCommercialCategory::getAllUserForSociete($PDOdb, $soc->id,$fk_category);
+		
+		if(!empty($TUserIdAffected)) {
+			foreach($TUserIdAffected as $idcomm) {
+			//	print "Ajout $idcomm dans ".$soc->id."<br>";
+				$res = $soc->add_commercial($user, $idcomm);
+				
+			}
+			
+		}
+
+		$listsalesrepresentatives=$soc->getSalesRepresentatives($user);		
+		
+		foreach($listsalesrepresentatives as &$comm) {
+			if(!in_array($comm['id'], $TUserIdAffected)) {
+				$soc->del_commercial($user, $comm['id']);
+			}
+		}
+		
 	}
 
 	function loadByCategoryUser(&$PDOdb, $fk_category, $fk_user) {
@@ -94,13 +107,17 @@ class TCommercialCategory extends TObjetStd {
 		
 	}
 	
-	static function getAllUserForSociete(&$PDOdb, $fk_soc) {
+	static function getAllUserForSociete(&$PDOdb, $fk_soc,$fk_category=null) {
 		//$PDOdb->debug=true;
-		$Tab = $PDOdb->ExecuteAsArray("SELECT DISTINCT fk_user 
+		
+		$sql ="SELECT DISTINCT fk_user 
 				FROM ".MAIN_DB_PREFIX."commercial_category cc
 				LEFT JOIN ".MAIN_DB_PREFIX."categorie_societe cs ON (cs.fk_categorie = cc.fk_category )
-				WHERE cs.fk_soc=".$fk_soc);
-				
+				WHERE cs.fk_soc=".$fk_soc;
+		
+		if($fk_category>0) $sql.=" OR cc.fk_category=".$fk_category;
+		
+		$Tab = $PDOdb->ExecuteAsArray($sql);
 				
 		$TUserId=array();
 		foreach($Tab as &$row) {
@@ -124,8 +141,6 @@ class TCommercialCategory extends TObjetStd {
 			
 			$o=new Societe($db);
 			if($o->fetch($row->fk_soc)>0) {
-				
-				$o->TUserIdAffected = TCommercialCategory::getAllUserForSociete($PDOdb, $o->id);
 				
 				$TSoc[] = $o;
 			}
