@@ -116,7 +116,8 @@ class InterfaceCommercialByCategorytrigger
         // Put here code you want to execute when a Dolibarr business events occurs.
         // Data and type of action are stored into $object and $action
         // Users
-        if ($action === 'CATEGORY_LINK' || $action === 'CATEGORY_UNLINK') {
+        if (($action === 'CATEGORY_LINK' || $action === 'CATEGORY_UNLINK')
+        && get_class($object) == 'Societe') {
         	
 			//var_dump($object->id, $object->linkto);exit;
 			
