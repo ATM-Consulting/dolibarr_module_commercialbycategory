@@ -45,7 +45,7 @@ class TCommercialCategory extends TObjetStd {
 		
 		foreach($TSociete as &$soc) {
 			
-			self::pdateSociete($PDOdb,$soc);
+			self::updateSociete($PDOdb,$soc);
 
 		}
 		
