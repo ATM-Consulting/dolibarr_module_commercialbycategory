@@ -109,13 +109,13 @@ function _fiche(&$PDOdb,$id) {
 		$title=$langs->trans("ListOfUsers");
 
 		$sql = "SELECT u.rowid, u.lastname, u.firstname, u.login";
-		$sql.= " FROM ".MAIN_DB_PREFIX."user as u LEFT JOIN ".MAIN_DB_PREFIX."commercial_category cc ON (cc.fk_user = u .rowid)";
+		$sql.= " FROM ".MAIN_DB_PREFIX."user as u LEFT JOIN ".MAIN_DB_PREFIX."commercial_category cc ON (cc.fk_user = u .rowid AND cc.fk_category=".$object->id.")";
 		$sql.= " WHERE u.entity IN (0,".$conf->entity.")";
 		if (! empty($conf->global->USER_HIDE_INACTIVE_IN_COMBOBOX)) $sql.= " AND u.statut<>0 ";
 		$sql.= " AND cc.rowid IS NULL ";
 
 		$sql.= " ORDER BY u.lastname ASC ";
-
+//var_dump($sql);
 		$resql = $db->query($sql);
 		if ($resql)
 		{
