@@ -140,7 +140,7 @@ class modCommercialByCategory extends DolibarrModules
 		// 'thirdparty'       to add a tab in third party view
 		// 'user'             to add a tab in user view
         $this->tabs = array(
-			'categories_2:+commercial:Commercials:commercialbycategory@commercialbycategory:$user->rights->commercialbycategory->write:/commercialbycategory/commercial.php?id=__ID__'			
+			'categories_2:+commercial:Commercial:commercialbycategory@commercialbycategory:$user->rights->commercialbycategory->write:/commercialbycategory/commercial.php?id=__ID__'			
 		);
 
         // Dictionaries
