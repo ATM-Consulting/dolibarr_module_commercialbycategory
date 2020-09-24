@@ -62,7 +62,6 @@ class commercialbycategorybox extends ModeleBoxes
 
         $this->max = $max;
 
-        //include_once DOL_DOCUMENT_ROOT . "/commercialbycategory/class/commercialbycategory.class.php";
 
         $text = $langs->trans("MyBoxDescription", $max);
         $this->info_box_head = array(
